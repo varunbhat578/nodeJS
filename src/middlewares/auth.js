@@ -23,6 +23,7 @@ const userAuth = async (req, res, next) => {
     res.status(500).send("Error token generation" + error.message);
   }
 };
+
 module.exports = {
   userAuth,
 };

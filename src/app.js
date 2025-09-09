@@ -1,140 +1,18 @@
 const express = require("express");
 const dbConnect = require("./config/database.js");
-const { validator } = require("./utils/Validator.js");
 const cookieParser = require("cookie-parser");
-const { userAuth } = require("./middlewares/auth.js");
 const app = express();
-const User = require("./models/user.js");
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.post("/signup", async (req, res) => {
-  try {
-    //validation amd error handling
-    validator(req);
-    const { firstName, lastName, emailId, password } = req.body;
-    //bycrpt to hash password before saving to db
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("hashed password", hashedPassword);
-    const users = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: hashedPassword,
-    });
+const authRouter = require("./routers/auth.js");
+const profileRouter = require("./routers/profile.js");
+const requestRouter = require("./routers/request.js");
 
-    await users.save();
-    res.send("User created successfully");
-  } catch (error) {
-    res.status(500).send("Error creating user: " + error.message);
-  }
-});
-//write login API
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-      throw new Error("Invalid credentials");
-    }
-    const isPasswordMatch = await user.validatePassword(password);
-    if (!isPasswordMatch) {
-      throw new Error("Invalid credentials");
-    } else {
-      const token = await user.getjWT();
-      res.cookie("token", token, {
-        expires: new Date(Date.now() + 8 * 3600000),
-      });
-      res.send("Login successful");
-    }
-  } catch (error) {
-    res.status(500).send("Error loggin in" + error.message);
-  }
-});
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.send(user);
-  } catch (error) {
-    res.status(500).send("Error " + error.message);
-  }
-});
-app.post("/sendConnectionRequest", userAuth, async (req, res) => {
-  const user = req.user;
-  console.log("connection request");
-  res.send(user.firstName + " sent you a request");
-});
-
-// Retrieve a user by email
-/*app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
-  try {
-    const users = await User.find({ emailId: userEmail });
-    if (users.length === 0) {
-      res.status(404).send("User not found");
-    } else {
-      res.send(users);
-    }
-  } catch (error) {
-    res.status(500).send("Error fetching user: " + error.message);
-  }
-});
-// Retrieve all users
-app.get("/find", async (req, res) => {
-  //  const userEmail = req.body.emailId;
-
-  try {
-    const foundResult = await User.find({});
-
-    if (foundResult) {
-      res.send(foundResult);
-    }
-  } catch (error) {
-    res.status(500).send("Error fetching user: " + error.message);
-  }
-});
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const deleteResult = await User.findByIdAndDelete({ _id: userId });
-    console.log("Trying to delete:", userId);
-    if (!deleteResult) {
-      return res.status(404).send("User not found");
-    }
-    res.send("User deleted successfully");
-  } catch (error) {
-    res.status(500).send("Error deleting user: " + error.message);
-  }
-});
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params.userId;
-  const updatedData = req.body;
-
-  try {
-    const allowedUpdates = [
-      "firstName",
-      "lastName",
-      "photoURL",
-      "description",
-      "skills",
-    ];
-    const isValid = Object.keys(updatedData).every((k) =>
-      allowedUpdates.includes(k)
-    );
-    if (!isValid) {
-      throw new Error("Invalid updates!");
-    }
-    await User.findByIdAndUpdate({ _id: userId }, updatedData, {
-      returnDocument: "after",
-      runValidators: true,
-    });
-    res.send("User updated successfully");
-  } catch (error) {
-    res.status(500).send("Error updating user: " + error.message);
-  }
-});
-*/
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
 
 dbConnect()
   .then(() => {

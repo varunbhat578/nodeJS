@@ -12,6 +12,23 @@ const validator = (request) => {
   }
   //return { firstName, lastName, emailId, password };
 };
+const ValidateEditProfile = (req) => {
+  const allowedUpdates = [
+    "firstName",
+    "lastName",
+    "photoURL",
+    "about",
+    "skills",
+  ];
+  const isValid = Object.keys(updatedData).every((k) =>
+    allowedUpdates.includes(k)
+  );
+  if (!isValid) {
+    throw new Error("Invalid updates!");
+  }
+  return isValid;
+};
 module.exports = {
   validator,
+  ValidateEditProfile,
 };

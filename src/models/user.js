@@ -24,13 +24,6 @@ const userSchema = mongoose.Schema(
           throw new Error("Invalid Email");
         }
       },
-      validate: {
-        validator: async function (value) {
-          const user = await mongoose.models.User.findOne({ emailId: value });
-          return !user;
-        },
-        message: "Email already exists",
-      },
     },
 
     password: {
