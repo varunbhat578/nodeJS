@@ -4,10 +4,12 @@ const connectionRequestschema = mongoose.Schema(
     fromUserId: {
       type: mongoose.SchemaTypes.ObjectId,
       required: true,
+      ref: "User",
     },
     toUserId: {
       type: mongoose.SchemaTypes.ObjectId,
       require: true,
+      ref: "User",
     },
     status: {
       enum: {
@@ -26,6 +28,7 @@ connectionRequestschema.pre("save", function (next) {
   if (connectionRequest.fromUserId.equals(connectionRequest.toUserId)) {
     throw new Error(" cannot send request to yourself");
   }
+  next();
 });
 const connectionSchemaRequest = mongoose.model(
   "connectionRequest",
