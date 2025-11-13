@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 
 const { userAuth } = require("../middlewares/auth");
-const ConnectionRequest = require("../models/request");
+const { connectionSchemaRequest } = require("../models/request");
 const User = require("../models/user");
 
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
@@ -64,9 +64,11 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
 
-    const connectionRequests = await ConnectionRequest.find({
-      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
-    }).select("fromUserId  toUserId");
+    const connectionRequests = await connectionSchemaRequest
+      .find({
+        $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+      })
+      .select("fromUserId  toUserId");
 
     const hideUsersFromFeed = new Set();
     connectionRequests.forEach((req) => {
