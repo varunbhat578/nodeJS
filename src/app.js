@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const dbConnect = require("./config/database.js");
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -22,11 +23,12 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+console.log("Loaded URI:", process.env.MONGODB_URI);
 
 dbConnect()
   .then(() => {
     console.log("Database connected");
-    app.listen(3000, () => {
+    app.listen(process.env.PORT, () => {
       console.log("Server is running on port 3000");
     });
   })
