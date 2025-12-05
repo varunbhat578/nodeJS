@@ -34,4 +34,4 @@ const connectionSchemaRequest = mongoose.model(
   "connectionRequest",
   connectionRequestschema
 );
-module.exports = { connectionSchemaRequest };
+module.exports = connectionSchemaRequest;
